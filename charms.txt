@@ -2657,8 +2657,7 @@ local FLY_SPEED_MIN = 10
 local FLY_SPEED_MAX = 500
 
 -- Whimsical mode animations (Roblox catalog item IDs)
--- local WHIMSY_IDLE_CATALOG_ID = 78399469246181 -- Floating (emote)
-local WHIMSY_IDLE_CATALOG_ID = 124987163648543 -- DayDreamIdle
+local WHIMSY_IDLE_CATALOG_ID = 78399469246181 -- Floating (emote)
 local WHIMSY_MOVE_CATALOG_ID = 75581091919666 -- Mark Invincible Fly Emote
 -- Lower it if the move animation already leans the body forward.
 local WHIMSY_TILT = 50
@@ -2851,20 +2850,10 @@ Fly_Button.MouseButton1Click:Connect(function()
 					bg.cframe = cam * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/FlySpeed),0,0)
 					sparkles.Enabled = false
 				end
-				-- Free look: while hovering still, hold your facing so the camera can orbit freely
+				-- Free look: while hovering still, freeze your current angle so the camera can orbit freely
 				if FlyFreeLook and not IsFlyMoving() and speed == 0 then
 					if not heldFacing then
-						local look = cam.lookVector
-						local flat = Vector3.new(look.X, 0, look.Z)
-						if flat.Magnitude < 0.01 then
-							flat = Vector3.new(UpperTorso.CFrame.lookVector.X, 0, UpperTorso.CFrame.lookVector.Z)
-						end
-						if flat.Magnitude < 0.01 then
-							flat = Vector3.new(0, 0, -1)
-						end
-						heldFacing = CFrame.lookAt(Vector3.new(), flat.Unit)
-						pitch = 0
-						roll = 0
+						heldFacing = bg.cframe - bg.cframe.Position
 					end
 					bg.cframe = heldFacing
 				else
