@@ -2659,8 +2659,8 @@ local FLY_SPEED_MAX = 500
 -- Whimsical mode animations (Roblox catalog item IDs)
 -- local WHIMSY_IDLE_CATALOG_ID = 78399469246181 -- Floating (emote)
 local WHIMSY_IDLE_CATALOG_ID = 124987163648543 -- DayDreamIdle
--- local WHIMSY_MOVE_CATALOG_ID = 75581091919666 -- Mark Invincible Fly Emote
-local WHIMSY_MOVE_CATALOG_ID = 131950236025472 -- RelaxFly
+local WHIMSY_MOVE_CATALOG_ID = 75581091919666 -- Mark Invincible Fly Emote
+-- local WHIMSY_MOVE_CATALOG_ID = 131950236025472 -- RelaxFly
 -- Lower it if the move animation already leans the body forward.
 local WHIMSY_TILT = 50
 -- Backup: if the automatic lookup fails, paste the real AnimationId numbers here
