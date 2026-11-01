@@ -21,9 +21,6 @@ local ScriptWhitelist = {}
 local ForceWhitelist = {}
 local TargetedPlayer = nil
 local FlySpeed = 50
-local FlySpeedStep = 10
-local FlySpeedAdjustEnabled = true
-local WhimsicalFlyAnimation = true
 local PotionTool = nil
 local SavedCheckpoint = nil
 local MinesFolder = nil
@@ -307,9 +304,10 @@ local SaveCheckpoint_Button = Instance.new("TextButton")
 local Respawn_Button = Instance.new("TextButton")
 local FlySpeed_Button = Instance.new("TextButton")
 local FlySpeed_Input = Instance.new("TextBox")
+local Fly_Button = Instance.new("TextButton")
 local FlySpeedDown_Button = Instance.new("TextButton")
 local FlySpeedUp_Button = Instance.new("TextButton")
-local Fly_Button = Instance.new("TextButton")
+local FlyMode_Button = Instance.new("TextButton")
 local Target_Section = Instance.new("ScrollingFrame")
 local TargetImage = Instance.new("ImageLabel")
 local ClickTargetTool_Button = Instance.new("ImageButton")
@@ -350,7 +348,6 @@ local PrincessAnim_Button = Instance.new("TextButton")
 local CowboyAnim_Button = Instance.new("TextButton")
 local PatrolAnim_Button = Instance.new("TextButton")
 local ZombieFEAnim_Button = Instance.new("TextButton")
-local WhimsicalFlyAnim_Button = Instance.new("TextButton")
 --NEWS
 local Misc_Section = Instance.new("ScrollingFrame")
 local AntiFling_Button = Instance.new("TextButton")
@@ -963,7 +960,7 @@ Character_Section.BorderSizePixel = 0
 Character_Section.Position = UDim2.new(0, 105, 0, 30)
 Character_Section.Size = UDim2.new(0, 395, 0, 320)
 Character_Section.Visible = false
-Character_Section.CanvasSize = UDim2.new(0, 0, 1.2, 0)
+Character_Section.CanvasSize = UDim2.new(0, 0, 1, 0)
 Character_Section.ScrollBarThickness = 5
 
 WalkSpeed_Button.Name = "WalkSpeed_Button"
@@ -1002,7 +999,7 @@ ClearCheckpoint_Button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
 ClearCheckpoint_Button.BackgroundTransparency = 0.500
 ClearCheckpoint_Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 ClearCheckpoint_Button.BorderSizePixel = 0
-ClearCheckpoint_Button.Position = UDim2.new(0, 210, 0, 275)
+ClearCheckpoint_Button.Position = UDim2.new(0, 210, 0, 225)
 ClearCheckpoint_Button.Size = UDim2.new(0, 150, 0, 30)
 ClearCheckpoint_Button.Font = Enum.Font.Oswald
 ClearCheckpoint_Button.Text = "Clear checkpoint"
@@ -1047,7 +1044,7 @@ SaveCheckpoint_Button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
 SaveCheckpoint_Button.BackgroundTransparency = 0.500
 SaveCheckpoint_Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 SaveCheckpoint_Button.BorderSizePixel = 0
-SaveCheckpoint_Button.Position = UDim2.new(0, 210, 0, 225)
+SaveCheckpoint_Button.Position = UDim2.new(0, 210, 0, 175)
 SaveCheckpoint_Button.Size = UDim2.new(0, 150, 0, 30)
 SaveCheckpoint_Button.Font = Enum.Font.Oswald
 SaveCheckpoint_Button.Text = "Save checkpoint"
@@ -1062,7 +1059,7 @@ Respawn_Button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
 Respawn_Button.BackgroundTransparency = 0.500
 Respawn_Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Respawn_Button.BorderSizePixel = 0
-Respawn_Button.Position = UDim2.new(0, 25, 0, 275)
+Respawn_Button.Position = UDim2.new(0, 25, 0, 225)
 Respawn_Button.Size = UDim2.new(0, 150, 0, 30)
 Respawn_Button.Font = Enum.Font.Oswald
 Respawn_Button.Text = "Respawn"
@@ -1080,7 +1077,7 @@ FlySpeed_Button.BorderSizePixel = 0
 FlySpeed_Button.Position = UDim2.new(0, 25, 0, 125)
 FlySpeed_Button.Size = UDim2.new(0, 150, 0, 30)
 FlySpeed_Button.Font = Enum.Font.Oswald
-FlySpeed_Button.Text = "Speed steps: ON"
+FlySpeed_Button.Text = "Fly speed"
 FlySpeed_Button.TextColor3 = Color3.fromRGB(0, 0, 0)
 FlySpeed_Button.TextScaled = true
 FlySpeed_Button.TextSize = 14.000
@@ -1095,37 +1092,11 @@ FlySpeed_Input.Position = UDim2.new(0, 210, 0, 125)
 FlySpeed_Input.Size = UDim2.new(0, 175, 0, 30)
 FlySpeed_Input.Font = Enum.Font.Gotham
 FlySpeed_Input.PlaceholderColor3 = Color3.fromRGB(0, 0, 0)
-FlySpeed_Input.PlaceholderText = "Current fly speed"
-FlySpeed_Input.Text = "50"
+FlySpeed_Input.PlaceholderText = "Number [1-99999]"
+FlySpeed_Input.Text = ""
 FlySpeed_Input.TextColor3 = Color3.fromRGB(20, 20, 20)
 FlySpeed_Input.TextSize = 14.000
 FlySpeed_Input.TextWrapped = true
-FlySpeed_Input.ClearTextOnFocus = false
-FlySpeed_Input.TextEditable = false
-
-FlySpeedDown_Button.Name = "FlySpeedDown_Button"
-FlySpeedDown_Button.Parent = Character_Section
-FlySpeedDown_Button.Position = UDim2.new(0, 25, 0, 165)
-FlySpeedDown_Button.Size = UDim2.new(0, 150, 0, 35)
-FlySpeedDown_Button.BackgroundColor3 = Color3.fromRGB(0, 180, 190)
-FlySpeedDown_Button.BorderSizePixel = 0
-FlySpeedDown_Button.Font = Enum.Font.GothamBold
-FlySpeedDown_Button.Text = "− 10 SPEED"
-FlySpeedDown_Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlySpeedDown_Button.TextSize = 14
-FlySpeedDown_Button.AutoButtonColor = true
-
-FlySpeedUp_Button.Name = "FlySpeedUp_Button"
-FlySpeedUp_Button.Parent = Character_Section
-FlySpeedUp_Button.Position = UDim2.new(0, 210, 0, 165)
-FlySpeedUp_Button.Size = UDim2.new(0, 175, 0, 35)
-FlySpeedUp_Button.BackgroundColor3 = Color3.fromRGB(0, 180, 190)
-FlySpeedUp_Button.BorderSizePixel = 0
-FlySpeedUp_Button.Font = Enum.Font.GothamBold
-FlySpeedUp_Button.Text = "+ 10 SPEED"
-FlySpeedUp_Button.TextColor3 = Color3.fromRGB(255, 255, 255)
-FlySpeedUp_Button.TextSize = 14
-FlySpeedUp_Button.AutoButtonColor = true
 
 Fly_Button.Name = "Fly_Button"
 Fly_Button.Parent = Character_Section
@@ -1133,7 +1104,7 @@ Fly_Button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
 Fly_Button.BackgroundTransparency = 0.500
 Fly_Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 Fly_Button.BorderSizePixel = 0
-Fly_Button.Position = UDim2.new(0, 25, 0, 225)
+Fly_Button.Position = UDim2.new(0, 25, 0, 175)
 Fly_Button.Size = UDim2.new(0, 150, 0, 30)
 Fly_Button.Font = Enum.Font.Oswald
 Fly_Button.Text = "Fly"
@@ -1141,6 +1112,51 @@ Fly_Button.TextColor3 = Color3.fromRGB(0, 0, 0)
 Fly_Button.TextScaled = true
 Fly_Button.TextSize = 14.000
 Fly_Button.TextWrapped = true
+
+FlySpeedDown_Button.Name = "FlySpeedDown_Button"
+FlySpeedDown_Button.Parent = Character_Section
+FlySpeedDown_Button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+FlySpeedDown_Button.BackgroundTransparency = 0.500
+FlySpeedDown_Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
+FlySpeedDown_Button.BorderSizePixel = 0
+FlySpeedDown_Button.Position = UDim2.new(0, 25, 0, 275)
+FlySpeedDown_Button.Size = UDim2.new(0, 70, 0, 30)
+FlySpeedDown_Button.Font = Enum.Font.Oswald
+FlySpeedDown_Button.Text = "-10"
+FlySpeedDown_Button.TextColor3 = Color3.fromRGB(0, 0, 0)
+FlySpeedDown_Button.TextScaled = true
+FlySpeedDown_Button.TextSize = 14.000
+FlySpeedDown_Button.TextWrapped = true
+
+FlySpeedUp_Button.Name = "FlySpeedUp_Button"
+FlySpeedUp_Button.Parent = Character_Section
+FlySpeedUp_Button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+FlySpeedUp_Button.BackgroundTransparency = 0.500
+FlySpeedUp_Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
+FlySpeedUp_Button.BorderSizePixel = 0
+FlySpeedUp_Button.Position = UDim2.new(0, 105, 0, 275)
+FlySpeedUp_Button.Size = UDim2.new(0, 70, 0, 30)
+FlySpeedUp_Button.Font = Enum.Font.Oswald
+FlySpeedUp_Button.Text = "+10"
+FlySpeedUp_Button.TextColor3 = Color3.fromRGB(0, 0, 0)
+FlySpeedUp_Button.TextScaled = true
+FlySpeedUp_Button.TextSize = 14.000
+FlySpeedUp_Button.TextWrapped = true
+
+FlyMode_Button.Name = "FlyMode_Button"
+FlyMode_Button.Parent = Character_Section
+FlyMode_Button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
+FlyMode_Button.BackgroundTransparency = 0.500
+FlyMode_Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
+FlyMode_Button.BorderSizePixel = 0
+FlyMode_Button.Position = UDim2.new(0, 210, 0, 275)
+FlyMode_Button.Size = UDim2.new(0, 150, 0, 30)
+FlyMode_Button.Font = Enum.Font.Oswald
+FlyMode_Button.Text = "Mode: Classic"
+FlyMode_Button.TextColor3 = Color3.fromRGB(0, 0, 0)
+FlyMode_Button.TextScaled = true
+FlyMode_Button.TextSize = 14.000
+FlyMode_Button.TextWrapped = true
 
 Target_Section.Name = "Target_Section"
 Target_Section.Parent = Background
@@ -1394,7 +1410,7 @@ Animations_Section.BorderSizePixel = 0
 Animations_Section.Position = UDim2.new(0, 105, 0, 30)
 Animations_Section.Size = UDim2.new(0, 395, 0, 320)
 Animations_Section.Visible = false
-Animations_Section.CanvasSize = UDim2.new(0, 0, 2.35, 0)
+Animations_Section.CanvasSize = UDim2.new(0, 0, 1.6, 0)
 Animations_Section.ScrollBarThickness = 5
 
 VampireAnim_Button.Name = "VampireAnim_Button"
@@ -1711,19 +1727,6 @@ ZombieFEAnim_Button.TextColor3 = Color3.fromRGB(0, 0, 0)
 ZombieFEAnim_Button.TextScaled = true
 ZombieFEAnim_Button.TextSize = 14.000
 ZombieFEAnim_Button.TextWrapped = true
-
-WhimsicalFlyAnim_Button.Name = "WhimsicalFlyAnim_Button"
-WhimsicalFlyAnim_Button.Parent = Animations_Section
-WhimsicalFlyAnim_Button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
-WhimsicalFlyAnim_Button.BackgroundTransparency = 0.5
-WhimsicalFlyAnim_Button.BorderSizePixel = 0
-WhimsicalFlyAnim_Button.Position = UDim2.new(0, 25, 0, 675)
-WhimsicalFlyAnim_Button.Size = UDim2.new(0, 335, 0, 34)
-WhimsicalFlyAnim_Button.Font = Enum.Font.GothamBold
-WhimsicalFlyAnim_Button.Text = "Whimsical Spiral Flight: ON"
-WhimsicalFlyAnim_Button.TextColor3 = Color3.fromRGB(0, 0, 0)
-WhimsicalFlyAnim_Button.TextSize = 14
-WhimsicalFlyAnim_Button.TextWrapped = true
 
 Misc_Section.Name = "Misc_Section"
 Misc_Section.Parent = Background
@@ -2117,14 +2120,13 @@ CreateClicker(SkyscraperTP_Button)
 CreateClicker(PoolTP_Button)
 
 CreateToggle(Fly_Button)
+CreateClicker(FlyMode_Button)
 CreateClicker(WalkSpeed_Button)
 CreateClicker(ClearCheckpoint_Button)
 CreateClicker(JumpPower_Button)
 CreateClicker(SaveCheckpoint_Button)
 CreateClicker(Respawn_Button)
-CreateToggle(FlySpeed_Button)
-CreateClicker(FlySpeedDown_Button)
-CreateClicker(FlySpeedUp_Button)
+CreateClicker(FlySpeed_Button)
 
 CreateToggle(ViewTarget_Button)
 CreateToggle(FlingTarget_Button)
@@ -2160,7 +2162,6 @@ CreateClicker(PrincessAnim_Button)
 CreateClicker(CowboyAnim_Button)
 CreateClicker(PatrolAnim_Button)
 CreateClicker(ZombieFEAnim_Button)
-CreateToggle(WhimsicalFlyAnim_Button)
 
 CreateToggle(AntiFling_Button)
 CreateToggle(AntiChatSpy_Button)
@@ -2246,58 +2247,6 @@ local function ToggleFling(bool)
 		end
 	end)
 end
-
--- MODERN UI THEME
-Background.BackgroundColor3 = Color3.fromRGB(13, 23, 31)
-Background.ImageTransparency = 1
-Background.BorderSizePixel = 0
-TitleBarLabel.BackgroundColor3 = Color3.fromRGB(17, 38, 48)
-TitleBarLabel.BackgroundTransparency = 0
-TitleBarLabel.Font = Enum.Font.GothamBold
-TitleBarLabel.TextColor3 = Color3.fromRGB(105, 235, 235)
-SectionList.BackgroundColor3 = Color3.fromRGB(17, 34, 44)
-SectionList.BackgroundTransparency = 0
-for _, ui in ipairs(SysBroker:GetDescendants()) do
-	if ui:IsA("TextButton") then
-		ui.Font = Enum.Font.GothamSemibold
-		ui.TextColor3 = Color3.fromRGB(235, 249, 250)
-		if ui.BackgroundTransparency < 1 then
-			ui.BackgroundColor3 = Color3.fromRGB(28, 91, 101)
-			ui.BackgroundTransparency = 0.08
-		end
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 7)
-		corner.Parent = ui
-		local stroke = Instance.new("UIStroke")
-		stroke.Color = Color3.fromRGB(64, 177, 185)
-		stroke.Transparency = 0.55
-		stroke.Thickness = 1
-		stroke.Parent = ui
-	elseif ui:IsA("TextBox") then
-		ui.BackgroundColor3 = Color3.fromRGB(24, 48, 59)
-		ui.TextColor3 = Color3.fromRGB(235, 249, 250)
-		ui.PlaceholderColor3 = Color3.fromRGB(145, 177, 185)
-		ui.Font = Enum.Font.Gotham
-		local corner = Instance.new("UICorner")
-		corner.CornerRadius = UDim.new(0, 7)
-		corner.Parent = ui
-		local stroke = Instance.new("UIStroke")
-		stroke.Color = Color3.fromRGB(64, 177, 185)
-		stroke.Transparency = 0.6
-		stroke.Parent = ui
-	elseif ui:IsA("ScrollingFrame") then
-		ui.ScrollBarImageColor3 = Color3.fromRGB(65, 190, 198)
-		ui.ScrollBarThickness = 4
-	end
-end
-FlySpeed_Button.Text = "Speed steps: ON"
-FlySpeed_Input.Text = tostring(FlySpeed)
-FlySpeed_Input.TextXAlignment = Enum.TextXAlignment.Center
-FlySpeed_Button.Ticket_Asset.ImageColor3 = Color3.fromRGB(0, 255, 0)
-WhimsicalFlyAnim_Button.Ticket_Asset.ImageColor3 = Color3.fromRGB(0, 255, 0)
-FlySpeedDown_Button.BackgroundColor3 = Color3.fromRGB(33, 103, 116)
-FlySpeedUp_Button.BackgroundColor3 = Color3.fromRGB(33, 130, 137)
-WhimsicalFlyAnim_Button.Text = "Whimsical Spiral Flight: ON"
 
 --CHANGE SECTION BUTTONS
 ChangeSection(Home_Section_Button)
@@ -2648,38 +2597,15 @@ JumpPower_Button.MouseButton1Click:Connect(function()
 	end)
 end)
 
-local function RefreshFlySpeedDisplay()
-	FlySpeed_Input.Text = tostring(FlySpeed)
-end
-
 FlySpeed_Button.MouseButton1Click:Connect(function()
-	FlySpeedAdjustEnabled = not FlySpeedAdjustEnabled
-	FlySpeed_Button.Text = FlySpeedAdjustEnabled and "Speed steps: ON" or "Speed steps: OFF"
-	FlySpeed_Button.Ticket_Asset.ImageColor3 = FlySpeedAdjustEnabled and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-	FlySpeedDown_Button.Active = FlySpeedAdjustEnabled
-	FlySpeedUp_Button.Active = FlySpeedAdjustEnabled
-	FlySpeedDown_Button.AutoButtonColor = FlySpeedAdjustEnabled
-	FlySpeedUp_Button.AutoButtonColor = FlySpeedAdjustEnabled
-	SendNotify("System Broken", FlySpeedAdjustEnabled and "Fly speed steps enabled." or "Fly speed steps disabled.", 4)
-end)
-
-FlySpeedDown_Button.MouseButton1Click:Connect(function()
-	if not FlySpeedAdjustEnabled then return end
-	FlySpeed = math.max(1, FlySpeed - FlySpeedStep)
-	RefreshFlySpeedDisplay()
-end)
-
-FlySpeedUp_Button.MouseButton1Click:Connect(function()
-	if not FlySpeedAdjustEnabled then return end
-	FlySpeed = math.min(99999, FlySpeed + FlySpeedStep)
-	RefreshFlySpeedDisplay()
-end)
-
-WhimsicalFlyAnim_Button.MouseButton1Click:Connect(function()
-	WhimsicalFlyAnimation = not WhimsicalFlyAnimation
-	WhimsicalFlyAnim_Button.Text = WhimsicalFlyAnimation and "Whimsical Spiral Flight: ON" or "Whimsical Spiral Flight: OFF"
-	WhimsicalFlyAnim_Button.Ticket_Asset.ImageColor3 = WhimsicalFlyAnimation and Color3.fromRGB(0, 255, 0) or Color3.fromRGB(255, 0, 0)
-	SendNotify("System Broken", WhimsicalFlyAnimation and "Whimsical Spiral flight enabled." or "Whimsical Spiral flight disabled.", 4)
+	pcall(function()
+		local Speed = FlySpeed_Input.Text:gsub("%D", "")
+		if Speed == "" then
+			Speed = 50
+		end
+		FlySpeed = tonumber(Speed)
+		SendNotify("System Broken","Fly speed updated.",5)
+	end)
 end)
 
 Respawn_Button.MouseButton1Click:Connect(function()
@@ -2699,13 +2625,131 @@ ClearCheckpoint_Button.MouseButton1Click:Connect(function()
 	SendNotify("System Broken","Checkpoint cleared.",5)
 end)
 
+--FLY (Classic + Whimsical)
 local flying = true
 local deb = true
-RefreshFlySpeedDisplay()
 local ctrl = {f = 0, b = 0, l = 0, r = 0}
 local lastctrl = {f = 0, b = 0, l = 0, r = 0}
 local KeyDownFunction = nil
 local KeyUpFunction = nil
+
+local FlyMode = "Classic"
+local FLY_SPEED_STEP = 10
+local FLY_SPEED_MIN = 10
+local FLY_SPEED_MAX = 500
+
+-- Whimsical mode animations (Roblox catalog item IDs)
+local WHIMSY_IDLE_CATALOG_ID = 124987163648543 -- Daydreaming Aura Animation Pack - Idle
+local WHIMSY_MOVE_CATALOG_ID = 93517574862244  -- Floating Hero Aura - Walk
+-- Backup: if the automatic lookup fails, paste the real AnimationId numbers here
+local WHIMSY_IDLE_ANIM_OVERRIDE = nil
+local WHIMSY_MOVE_ANIM_OVERRIDE = nil
+
+local WhimsyIdleId = nil
+local WhimsyMoveId = nil
+local WhimsyTrack = nil
+local WhimsyTrackId = nil
+
+-- Opens a catalog animation item and pulls out the AnimationIds inside it
+local function ResolveCatalogAnims(catalogId)
+	local found = {}
+	local ok, objs = pcall(function()
+		return game:GetObjects("rbxassetid://"..catalogId)
+	end)
+	if ok and type(objs) == "table" then
+		for _,obj in ipairs(objs) do
+			local list = obj:GetDescendants()
+			table.insert(list, obj)
+			for _,d in ipairs(list) do
+				if d:IsA("Animation") and d.AnimationId ~= "" then
+					local id = d.AnimationId:match("(%d+)%s*$") or d.AnimationId:match("%d+")
+					if id then
+						table.insert(found, {name = d.Name, id = id})
+					end
+				end
+			end
+		end
+	end
+	table.sort(found, function(a,b) return a.name < b.name end)
+	return found
+end
+
+task.spawn(function()
+	if WHIMSY_IDLE_ANIM_OVERRIDE then
+		WhimsyIdleId = tostring(WHIMSY_IDLE_ANIM_OVERRIDE)
+	else
+		local idle = ResolveCatalogAnims(WHIMSY_IDLE_CATALOG_ID)
+		if idle[1] then WhimsyIdleId = idle[1].id end
+	end
+	if WHIMSY_MOVE_ANIM_OVERRIDE then
+		WhimsyMoveId = tostring(WHIMSY_MOVE_ANIM_OVERRIDE)
+	else
+		local move = ResolveCatalogAnims(WHIMSY_MOVE_CATALOG_ID)
+		if move[1] then WhimsyMoveId = move[1].id end
+	end
+end)
+
+local function IsFlyMoving()
+	return (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0
+end
+
+local function StopWhimsyAnim()
+	if WhimsyTrack then
+		pcall(function() WhimsyTrack:Stop(0.3) end)
+	end
+	WhimsyTrack = nil
+	WhimsyTrackId = nil
+end
+
+-- Plays a looping animation with a soft crossfade; returns false if it couldn't
+local function PlayWhimsyAnim(id)
+	if not id then return false end
+	if WhimsyTrackId == id and WhimsyTrack and WhimsyTrack.IsPlaying then return true end
+	local ok = pcall(function()
+		local hum = plr.Character.Humanoid
+		plr.Character.Animate.Disabled = true
+		for _,track in pairs(hum:GetPlayingAnimationTracks()) do
+			if track ~= WhimsyTrack then track:Stop(0.2) end
+		end
+		local anim = Instance.new("Animation")
+		anim.AnimationId = "rbxassetid://"..id
+		local track = hum:LoadAnimation(anim)
+		track.Looped = true
+		track.Priority = Enum.AnimationPriority.Action
+		track:Play(0.3)
+		if WhimsyTrack then WhimsyTrack:Stop(0.3) end
+		WhimsyTrack = track
+		WhimsyTrackId = id
+	end)
+	return ok
+end
+
+-- Idle = Daydreaming, moving = Floating Hero; falls back to the classic hover pose
+local function UpdateWhimsyAnim()
+	local id = IsFlyMoving() and WhimsyMoveId or WhimsyIdleId
+	if not PlayWhimsyAnim(id) then
+		StopWhimsyAnim()
+		PlayAnim(10714347256,4,0)
+	end
+end
+
+local function MakeSparkles(parent)
+	local p = Instance.new("ParticleEmitter")
+	p.Name = "WhimsySparkles"
+	p.Texture = "rbxasset://textures/particles/sparkles_main.dds"
+	p.Rate = 14
+	p.Lifetime = NumberRange.new(0.8, 1.4)
+	p.Speed = NumberRange.new(0.5, 2)
+	p.SpreadAngle = Vector2.new(180, 180)
+	p.LightEmission = 1
+	p.Size = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.35), NumberSequenceKeypoint.new(1, 0)})
+	p.Transparency = NumberSequence.new({NumberSequenceKeypoint.new(0, 0.2), NumberSequenceKeypoint.new(1, 1)})
+	p.Color = ColorSequence.new(Color3.fromRGB(200, 180, 255), Color3.fromRGB(255, 190, 230))
+	p.Enabled = false
+	p.Parent = parent
+	return p
+end
+
 Fly_Button.MouseButton1Click:Connect(function()
 	ChangeToggleColor(Fly_Button)
 	if Fly_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0) then
@@ -2723,68 +2767,118 @@ Fly_Button.MouseButton1Click:Connect(function()
 			local bv = Instance.new("BodyVelocity", UpperTorso)
 			bv.velocity = Vector3.new(0,0.1,0)
 			bv.maxForce = Vector3.new(9e9, 9e9, 9e9)
-			local spiralClock = 0
-			repeat
-				local deltaTime = task.wait()
-				spiralClock = spiralClock + deltaTime
+			local sparkles = MakeSparkles(UpperTorso)
+			local roll = 0
+			if FlyMode == "Whimsical" then
+				UpdateWhimsyAnim()
+			else
+				PlayAnim(10714347256,4,0)
+			end
+			repeat task.wait()
 				plr.Character.Humanoid.PlatformStand = true
+				local whimsy = (FlyMode == "Whimsical")
+				local accel = whimsy and 0.04 or 0.10
+				local decel = whimsy and 0.025 or 0.10
 				if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
-					speed = speed+FlySpeed*0.10
+					speed = speed+FlySpeed*accel
 					if speed > FlySpeed then
 						speed = FlySpeed
 					end
 				elseif not (ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0) and speed ~= 0 then
-					speed = speed-FlySpeed*0.10
+					speed = speed-FlySpeed*decel
 					if speed < 0 then
 						speed = 0
 					end
 				end
+				if speed > FlySpeed then
+					speed = FlySpeed
+				end
+				local cam = game.Workspace.CurrentCamera.CoordinateFrame
+				local vel
 				if (ctrl.l + ctrl.r) ~= 0 or (ctrl.f + ctrl.b) ~= 0 then
-					local travelVelocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (ctrl.f+ctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
-					local floatVelocity = WhimsicalFlyAnimation and math.cos(spiralClock * 1.25) * 0.9 or 0
-					bv.velocity = travelVelocity + Vector3.new(0, floatVelocity, 0)
+					vel = ((cam.lookVector * (ctrl.f+ctrl.b)) + ((cam * CFrame.new(ctrl.l+ctrl.r,(ctrl.f+ctrl.b)*.2,0).p) - cam.p))*speed
 					lastctrl = {f = ctrl.f, b = ctrl.b, l = ctrl.l, r = ctrl.r}
 				elseif (ctrl.l + ctrl.r) == 0 and (ctrl.f + ctrl.b) == 0 and speed ~= 0 then
-					local travelVelocity = ((game.Workspace.CurrentCamera.CoordinateFrame.lookVector * (lastctrl.f+lastctrl.b)) + ((game.Workspace.CurrentCamera.CoordinateFrame * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - game.Workspace.CurrentCamera.CoordinateFrame.p))*speed
-					local floatVelocity = WhimsicalFlyAnimation and math.cos(spiralClock * 1.25) * 0.9 or 0
-					bv.velocity = travelVelocity + Vector3.new(0, floatVelocity, 0)
+					vel = ((cam.lookVector * (lastctrl.f+lastctrl.b)) + ((cam * CFrame.new(lastctrl.l+lastctrl.r,(lastctrl.f+lastctrl.b)*.2,0).p) - cam.p))*speed
 				else
-					local floatVelocity = WhimsicalFlyAnimation and math.cos(spiralClock * 1.25) * 0.9 or 0
-					bv.velocity = Vector3.new(0, floatVelocity, 0)
+					vel = Vector3.new(0,0.1,0)
 				end
-				local pitch = -math.rad((ctrl.f+ctrl.b)*35*speed/math.max(FlySpeed, 1))
-				local spiralYaw = WhimsicalFlyAnimation and (spiralClock * 0.42 + math.sin(spiralClock * 0.7) * 0.22) or 0
-				bg.cframe = game.Workspace.CurrentCamera.CoordinateFrame * CFrame.Angles(pitch, spiralYaw, 0)
+				if whimsy then
+					-- gentle bobbing, softer tilt and banking into turns
+					local bob = math.sin(os.clock()*2.2) * (IsFlyMoving() and 1.2 or 2.5)
+					vel = vel + Vector3.new(0, bob, 0)
+					local targetRoll = -(ctrl.l+ctrl.r) * math.rad(28) * (speed/FlySpeed)
+					roll = roll + (targetRoll - roll)*0.08
+					bg.cframe = cam * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*20*speed/FlySpeed),0,roll)
+					sparkles.Enabled = true
+					-- keep the default Animate script from overriding the whimsical animations
+					local animate = plr.Character:FindFirstChild("Animate")
+					if animate and not animate.Disabled and WhimsyTrack then
+						animate.Disabled = true
+						for _,track in pairs(plr.Character.Humanoid:GetPlayingAnimationTracks()) do
+							if track ~= WhimsyTrack then track:Stop(0.2) end
+						end
+					end
+				else
+					roll = 0
+					bg.cframe = cam * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/FlySpeed),0,0)
+					sparkles.Enabled = false
+				end
+				bv.velocity = vel
 			until not flying
 			ctrl = {f = 0, b = 0, l = 0, r = 0}
 			lastctrl = {f = 0, b = 0, l = 0, r = 0}
 			speed = 0
 			bg:Destroy()
 			bv:Destroy()
+			sparkles:Destroy()
+			StopWhimsyAnim()
 			plr.Character.Humanoid.PlatformStand = false
 		end
 
 		KeyDownFunction = mouse.KeyDown:connect(function(key)
-			if key:lower() == "w" then
+			key = key:lower()
+			if key == "w" then
 				ctrl.f = 1
-			elseif key:lower() == "s" then
+			elseif key == "s" then
 				ctrl.b = -1
-			elseif key:lower() == "a" then
+			elseif key == "a" then
 				ctrl.l = -1
-			elseif key:lower() == "d" then
+			elseif key == "d" then
 				ctrl.r = 1
+			else
+				return
+			end
+			if FlyMode == "Whimsical" then
+				UpdateWhimsyAnim()
+			elseif key == "w" then
+				PlayAnim(10714177846,4.65,0)
+			elseif key == "s" then
+				PlayAnim(10147823318,4.11,0)
+			elseif key == "a" then
+				PlayAnim(10147823318,3.55,0)
+			elseif key == "d" then
+				PlayAnim(10147823318,4.81,0)
 			end
 		end)
 
 		KeyUpFunction = mouse.KeyUp:connect(function(key)
-			if key:lower() == "w" then
+			key = key:lower()
+			if key == "w" then
 				ctrl.f = 0
-			elseif key:lower() == "s" then
+			elseif key == "s" then
 				ctrl.b = 0
-			elseif key:lower() == "a" then
+			elseif key == "a" then
 				ctrl.l = 0
-			elseif key:lower() == "d" then
+			elseif key == "d" then
 				ctrl.r = 0
+			else
+				return
+			end
+			if FlyMode == "Whimsical" then
+				UpdateWhimsyAnim()
+			else
+				PlayAnim(10714347256,4,0)
 			end
 		end)
 		Fly()
@@ -2793,7 +2887,41 @@ Fly_Button.MouseButton1Click:Connect(function()
 		Fly_Pad.Visible = false
 		KeyDownFunction:Disconnect()
 		KeyUpFunction:Disconnect()
+		StopWhimsyAnim()
 		StopAnim()
+	end
+end)
+
+local function SetFlySpeed(value)
+	FlySpeed = math.clamp(value, FLY_SPEED_MIN, FLY_SPEED_MAX)
+	FlySpeed_Input.Text = tostring(FlySpeed)
+end
+
+FlySpeedDown_Button.MouseButton1Click:Connect(function()
+	SetFlySpeed(FlySpeed - FLY_SPEED_STEP)
+end)
+
+FlySpeedUp_Button.MouseButton1Click:Connect(function()
+	SetFlySpeed(FlySpeed + FLY_SPEED_STEP)
+end)
+
+FlyMode_Button.MouseButton1Click:Connect(function()
+	if FlyMode == "Classic" then
+		FlyMode = "Whimsical"
+	else
+		FlyMode = "Classic"
+	end
+	FlyMode_Button.Text = "Mode: "..FlyMode
+	if Fly_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0) then
+		if FlyMode == "Whimsical" then
+			UpdateWhimsyAnim()
+		else
+			StopWhimsyAnim()
+			PlayAnim(10714347256,4,0)
+		end
+	end
+	if FlyMode == "Whimsical" and (not WhimsyIdleId or not WhimsyMoveId) then
+		SendNotify("System Broken","Whimsical animations couldn't be loaded, using the classic pose. Paste the AnimationIds into the override lines to fix.",6)
 	end
 end)
 
