@@ -1763,7 +1763,7 @@ AntiFling_Button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
 AntiFling_Button.BackgroundTransparency = 0.500
 AntiFling_Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 AntiFling_Button.BorderSizePixel = 0
-AntiFling_Button.Position = UDim2.new(0, 25, 0, 25)
+AntiFling_Button.Position = UDim2.new(0, 210, 0, 175)
 AntiFling_Button.Size = UDim2.new(0, 150, 0, 30)
 AntiFling_Button.Font = Enum.Font.Oswald
 AntiFling_Button.Text = "Anti fling"
@@ -2793,6 +2793,7 @@ Fly_Button.MouseButton1Click:Connect(function()
 			local roll = 0
 			local pitch = 0
 			local heldFacing = nil
+			local hoverY = nil
 			if FlyMode == "Whimsical" then
 				UpdateWhimsyAnim()
 			else
@@ -2828,9 +2829,17 @@ Fly_Button.MouseButton1Click:Connect(function()
 					vel = Vector3.new(0,0.1,0)
 				end
 				if whimsy then
-					-- gentle bobbing, softer tilt and banking into turns
-					local bob = math.sin(os.clock()*2.2) * (IsFlyMoving() and 1.2 or 2.5)
-					vel = vel + Vector3.new(0, bob, 0)
+					-- bob while moving, but hold a steady hover height while idle
+					if IsFlyMoving() or speed ~= 0 then
+						hoverY = nil
+						vel = vel + Vector3.new(0, math.sin(os.clock()*2.2)*1.2, 0)
+					else
+						if not hoverY then
+							hoverY = UpperTorso.Position.Y - math.sin(os.clock()*2.2)*1.1
+						end
+						local targetY = hoverY + math.sin(os.clock()*2.2)*1.1
+						vel = Vector3.new(0, (targetY - UpperTorso.Position.Y)*6, 0)
+					end
 					-- same forward flip as Classic, eased in so it swoops instead of snapping
 					local targetPitch = -math.rad((ctrl.f+ctrl.b)*WHIMSY_TILT*speed/FlySpeed)
 					pitch = pitch + (targetPitch - pitch)*0.12
@@ -2847,6 +2856,7 @@ Fly_Button.MouseButton1Click:Connect(function()
 						end
 					end
 				else
+					hoverY = nil
 					roll = 0
 					pitch = 0
 					bg.cframe = cam * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/FlySpeed),0,0)
@@ -3598,12 +3608,7 @@ end)
 
 AntiFling_Button.MouseButton1Click:Connect(function()
 	ChangeToggleColor(AntiFling_Button)
-	if AntiFling_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0) then
-		_G.AntiFlingToggled = true
-		loadstring(game:HttpGet('https://raw.githubusercontent.com/H20CalibreYT/SystemBroken/main/AntiFling'))()
-	else
-		_G.AntiFlingToggled = false
-	end
+	SetAntiFlingEnabled(AntiFling_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0))
 end)
 
 AntiChatSpy_Button.MouseButton1Click:Connect(function()
@@ -3750,6 +3755,71 @@ ChatBox_Input.FocusLost:Connect(function()
 	game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
 	ChatBox_Input.Text = ""
 end)
+
+-- Local Anti Fling
+local ANTIFLING_MAX_SPIN = 50
+local ANTIFLING_MAX_SPEED = 200
+local AntiFlingConnection = nil
+local AntiFlingSafeCFrame = nil
+local AntiFlingOriginalCollisions = {}
+
+local function SetAntiFlingEnabled(enabled)
+	_G.AntiFlingToggled = enabled
+
+	if AntiFlingConnection then
+		AntiFlingConnection:Disconnect()
+		AntiFlingConnection = nil
+	end
+
+	if not enabled then
+		for part, canCollide in pairs(AntiFlingOriginalCollisions) do
+			if part and part.Parent then
+				part.CanCollide = canCollide
+			end
+		end
+		table.clear(AntiFlingOriginalCollisions)
+		AntiFlingSafeCFrame = nil
+		return
+	end
+
+	AntiFlingSafeCFrame = nil
+	AntiFlingConnection = RunService.Stepped:Connect(function()
+		for _, player in ipairs(Players:GetPlayers()) do
+			if player ~= plr and player.Character then
+				for _, part in ipairs(player.Character:GetDescendants()) do
+					if part:IsA("BasePart") then
+						if AntiFlingOriginalCollisions[part] == nil then
+							AntiFlingOriginalCollisions[part] = part.CanCollide
+						end
+						part.CanCollide = false
+					end
+				end
+			end
+		end
+
+		local character = plr.Character
+		local root = character and character:FindFirstChild("HumanoidRootPart")
+		if not root then
+			return
+		end
+
+		local angularSpeed = root.AssemblyAngularVelocity.Magnitude
+		local linearSpeed = root.AssemblyLinearVelocity.Magnitude
+		local isExcessiveSpin = angularSpeed > ANTIFLING_MAX_SPIN
+		local isExcessiveSpeed = linearSpeed > ANTIFLING_MAX_SPEED
+		local isExpectedFlySpeed = flying and linearSpeed <= (FlySpeed + 50)
+
+		if isExcessiveSpin or (isExcessiveSpeed and not isExpectedFlySpeed) then
+			if AntiFlingSafeCFrame then
+				root.CFrame = AntiFlingSafeCFrame
+			end
+			root.AssemblyLinearVelocity = Vector3.zero
+			root.AssemblyAngularVelocity = Vector3.zero
+		else
+			AntiFlingSafeCFrame = root.CFrame
+		end
+	end)
+end
 
 --GUI Functions
 Players.PlayerRemoving:Connect(function(player)
