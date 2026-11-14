@@ -2642,7 +2642,7 @@ ClearCheckpoint_Button.MouseButton1Click:Connect(function()
 	SendNotify("System Broken","Checkpoint cleared.",5)
 end)
 
---FLY (Classic + Whimsical + Angelic)
+--FLY (Classic + Whimsical)
 local flying = true
 local deb = true
 local ctrl = {f = 0, b = 0, l = 0, r = 0}
@@ -2656,30 +2656,19 @@ local FLY_SPEED_STEP = 10
 local FLY_SPEED_MIN = 10
 local FLY_SPEED_MAX = 500
 
--- WHIMSICAL MODE ANIMATIONS
--- Roblox catalog item IDs used to resolve the animation IDs.
+-- Whimsical mode animations (Roblox catalog item IDs)
 -- local WHIMSY_IDLE_CATALOG_ID = 78399469246181 -- Floating (emote)
 local WHIMSY_IDLE_CATALOG_ID = 124987163648543 -- DayDreamIdle
 local WHIMSY_MOVE_CATALOG_ID = 75581091919666 -- Mark Invincible Fly Emote
 -- local WHIMSY_MOVE_CATALOG_ID = 131950236025472 -- RelaxFly
+-- Lower it if the move animation already leans the body forward.
 local WHIMSY_TILT = 50
--- Optional direct AnimationId overrides.
+-- Backup: if the automatic lookup fails, paste the real AnimationId numbers here
 local WHIMSY_IDLE_ANIM_OVERRIDE = nil
 local WHIMSY_MOVE_ANIM_OVERRIDE = nil
 
 local WhimsyIdleId = nil
 local WhimsyMoveId = nil
-
--- ANGELIC MODE ANIMATIONS
--- These are independent from Whimsical. They currently use the same catalog
--- animations as Whimsical by default; set either override to a different
--- AnimationId to give Angelic its own idle or moving animation.
-local ANGELIC_IDLE_ANIM_OVERRIDE = 87561786988944 --GOJO Float
-local ANGELIC_MOVE_ANIM_OVERRIDE = nil
-local AngelicIdleId = 87561786988944 --GOJO Float
-local AngelicMoveId = nil
-
--- One animation track is active at a time; the selected mode chooses its IDs.
 local WhimsyTrack = nil
 local WhimsyTrackId = nil
 
@@ -2720,9 +2709,6 @@ task.spawn(function()
 		local move = ResolveCatalogAnims(WHIMSY_MOVE_CATALOG_ID)
 		if move[1] then WhimsyMoveId = move[1].id end
 	end
-	-- Angelic resolves independently and can use different direct IDs.
-	AngelicIdleId = ANGELIC_IDLE_ANIM_OVERRIDE and tostring(ANGELIC_IDLE_ANIM_OVERRIDE) or WhimsyIdleId
-	AngelicMoveId = ANGELIC_MOVE_ANIM_OVERRIDE and tostring(ANGELIC_MOVE_ANIM_OVERRIDE) or WhimsyMoveId
 end)
 
 local function IsFlyMoving()
@@ -2762,9 +2748,7 @@ end
 
 -- Idle = Daydreaming, moving = Floating Hero; falls back to the classic hover pose
 local function UpdateWhimsyAnim()
-	local idleId = FlyMode == "Angelic" and AngelicIdleId or WhimsyIdleId
-	local moveId = FlyMode == "Angelic" and AngelicMoveId or WhimsyMoveId
-	local id = IsFlyMoving() and moveId or idleId
+	local id = IsFlyMoving() and WhimsyMoveId or WhimsyIdleId
 	if not PlayWhimsyAnim(id) then
 		StopWhimsyAnim()
 		PlayAnim(10714347256,4,0)
@@ -2810,14 +2794,14 @@ Fly_Button.MouseButton1Click:Connect(function()
 			local pitch = 0
 			local heldFacing = nil
 			local hoverY = nil
-			if FlyMode == "Whimsical" or FlyMode == "Angelic" then
+			if FlyMode == "Whimsical" then
 				UpdateWhimsyAnim()
 			else
 				PlayAnim(10714347256,4,0)
 			end
 			repeat task.wait()
 				plr.Character.Humanoid.PlatformStand = true
-				local whimsy = (FlyMode == "Whimsical" or FlyMode == "Angelic")
+				local whimsy = (FlyMode == "Whimsical")
 				local accel = whimsy and 0.04 or 0.10
 				local decel = whimsy and 0.025 or 0.10
 				if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
@@ -2912,7 +2896,7 @@ Fly_Button.MouseButton1Click:Connect(function()
 			else
 				return
 			end
-			if FlyMode == "Whimsical" or FlyMode == "Angelic" then
+			if FlyMode == "Whimsical" then
 				UpdateWhimsyAnim()
 			elseif key == "w" then
 				PlayAnim(10714177846,4.65,0)
@@ -2938,7 +2922,7 @@ Fly_Button.MouseButton1Click:Connect(function()
 			else
 				return
 			end
-			if FlyMode == "Whimsical" or FlyMode == "Angelic" then
+			if FlyMode == "Whimsical" then
 				UpdateWhimsyAnim()
 			else
 				PlayAnim(10714347256,4,0)
@@ -2976,24 +2960,20 @@ end)
 FlyMode_Button.MouseButton1Click:Connect(function()
 	if FlyMode == "Classic" then
 		FlyMode = "Whimsical"
-	elseif FlyMode == "Whimsical" then
-		FlyMode = "Angelic"
 	else
 		FlyMode = "Classic"
 	end
 	FlyMode_Button.Text = "Mode: "..FlyMode
 	if Fly_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0) then
-		if FlyMode == "Whimsical" or FlyMode == "Angelic" then
+		if FlyMode == "Whimsical" then
 			UpdateWhimsyAnim()
 		else
 			StopWhimsyAnim()
 			PlayAnim(10714347256,4,0)
 		end
 	end
-	local idleId = FlyMode == "Angelic" and AngelicIdleId or WhimsyIdleId
-	local moveId = FlyMode == "Angelic" and AngelicMoveId or WhimsyMoveId
-	if (FlyMode == "Whimsical" or FlyMode == "Angelic") and (not idleId or not moveId) then
-		SendNotify("System Broken",FlyMode.." animations couldn't be loaded, using the classic pose. Paste the AnimationIds into that mode's override lines to fix.",6)
+	if FlyMode == "Whimsical" and (not WhimsyIdleId or not WhimsyMoveId) then
+		SendNotify("System Broken","Whimsical animations couldn't be loaded, using the classic pose. Paste the AnimationIds into the override lines to fix.",6)
 	end
 end)
 
