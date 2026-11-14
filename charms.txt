@@ -1763,7 +1763,7 @@ AntiFling_Button.BackgroundColor3 = Color3.fromRGB(0, 255, 255)
 AntiFling_Button.BackgroundTransparency = 0.500
 AntiFling_Button.BorderColor3 = Color3.fromRGB(0, 0, 0)
 AntiFling_Button.BorderSizePixel = 0
-AntiFling_Button.Position = UDim2.new(0, 210, 0, 175)
+AntiFling_Button.Position = UDim2.new(0, 25, 0, 25)
 AntiFling_Button.Size = UDim2.new(0, 150, 0, 30)
 AntiFling_Button.Font = Enum.Font.Oswald
 AntiFling_Button.Text = "Anti fling"
@@ -2667,6 +2667,15 @@ local WHIMSY_TILT = 50
 local WHIMSY_IDLE_ANIM_OVERRIDE = nil
 local WHIMSY_MOVE_ANIM_OVERRIDE = nil
 
+-- Angelic mode animations (catalog item IDs; set these to the idle and move you want)
+local ANGELIC_IDLE_CATALOG_ID = 87561786988944 --GOJO Float
+local ANGELIC_MOVE_CATALOG_ID = 75581091919666 -- Mark Invincible Fly Emote
+-- Backup: if the automatic lookup fails, paste the real AnimationId numbers here
+local ANGELIC_IDLE_ANIM_OVERRIDE = nil
+local ANGELIC_MOVE_ANIM_OVERRIDE = nil
+local AngelicIdleId = nil
+local AngelicMoveId = nil
+
 local WhimsyIdleId = nil
 local WhimsyMoveId = nil
 local WhimsyTrack = nil
@@ -2708,6 +2717,21 @@ task.spawn(function()
 	else
 		local move = ResolveCatalogAnims(WHIMSY_MOVE_CATALOG_ID)
 		if move[1] then WhimsyMoveId = move[1].id end
+	end
+end)
+
+task.spawn(function()
+	if ANGELIC_IDLE_ANIM_OVERRIDE then
+		AngelicIdleId = tostring(ANGELIC_IDLE_ANIM_OVERRIDE)
+	elseif ANGELIC_IDLE_CATALOG_ID then
+		local idle = ResolveCatalogAnims(ANGELIC_IDLE_CATALOG_ID)
+		if idle[1] then AngelicIdleId = idle[1].id end
+	end
+	if ANGELIC_MOVE_ANIM_OVERRIDE then
+		AngelicMoveId = tostring(ANGELIC_MOVE_ANIM_OVERRIDE)
+	elseif ANGELIC_MOVE_CATALOG_ID then
+		local move = ResolveCatalogAnims(ANGELIC_MOVE_CATALOG_ID)
+		if move[1] then AngelicMoveId = move[1].id end
 	end
 end)
 
@@ -2755,6 +2779,24 @@ local function UpdateWhimsyAnim()
 	end
 end
 
+-- Angelic uses its own idle and movement animations with the same transition behavior.
+local function UpdateAngelicAnim()
+	local id = IsFlyMoving() and AngelicMoveId or AngelicIdleId
+	if not PlayWhimsyAnim(id) then
+		StopWhimsyAnim()
+		PlayAnim(10714347256,4,0)
+	end
+end
+
+-- Select the animation updater for the active non-classic flight mode.
+local function UpdateStyledFlyAnim()
+	if FlyMode == "Angelic" then
+		UpdateAngelicAnim()
+	else
+		UpdateWhimsyAnim()
+	end
+end
+
 local function MakeSparkles(parent)
 	local p = Instance.new("ParticleEmitter")
 	p.Name = "WhimsySparkles"
@@ -2794,14 +2836,14 @@ Fly_Button.MouseButton1Click:Connect(function()
 			local pitch = 0
 			local heldFacing = nil
 			local hoverY = nil
-			if FlyMode == "Whimsical" then
-				UpdateWhimsyAnim()
+			if FlyMode ~= "Classic" then
+				UpdateStyledFlyAnim()
 			else
 				PlayAnim(10714347256,4,0)
 			end
 			repeat task.wait()
 				plr.Character.Humanoid.PlatformStand = true
-				local whimsy = (FlyMode == "Whimsical")
+				local whimsy = (FlyMode ~= "Classic")
 				local accel = whimsy and 0.04 or 0.10
 				local decel = whimsy and 0.025 or 0.10
 				if ctrl.l + ctrl.r ~= 0 or ctrl.f + ctrl.b ~= 0 then
@@ -2829,11 +2871,12 @@ Fly_Button.MouseButton1Click:Connect(function()
 					vel = Vector3.new(0,0.1,0)
 				end
 				if whimsy then
-					-- bob while moving, but hold a steady hover height while idle
+					-- gentle bobbing, softer tilt and banking into turns
 					if IsFlyMoving() or speed ~= 0 then
 						hoverY = nil
 						vel = vel + Vector3.new(0, math.sin(os.clock()*2.2)*1.2, 0)
 					else
+						-- Hover around a locked height so the bob cannot drift.
 						if not hoverY then
 							hoverY = UpperTorso.Position.Y - math.sin(os.clock()*2.2)*1.1
 						end
@@ -2856,9 +2899,9 @@ Fly_Button.MouseButton1Click:Connect(function()
 						end
 					end
 				else
-					hoverY = nil
 					roll = 0
 					pitch = 0
+					hoverY = nil
 					bg.cframe = cam * CFrame.Angles(-math.rad((ctrl.f+ctrl.b)*50*speed/FlySpeed),0,0)
 					sparkles.Enabled = false
 				end
@@ -2896,8 +2939,8 @@ Fly_Button.MouseButton1Click:Connect(function()
 			else
 				return
 			end
-			if FlyMode == "Whimsical" then
-				UpdateWhimsyAnim()
+			if FlyMode ~= "Classic" then
+				UpdateStyledFlyAnim()
 			elseif key == "w" then
 				PlayAnim(10714177846,4.65,0)
 			elseif key == "s" then
@@ -2922,8 +2965,8 @@ Fly_Button.MouseButton1Click:Connect(function()
 			else
 				return
 			end
-			if FlyMode == "Whimsical" then
-				UpdateWhimsyAnim()
+			if FlyMode ~= "Classic" then
+				UpdateStyledFlyAnim()
 			else
 				PlayAnim(10714347256,4,0)
 			end
@@ -2960,13 +3003,15 @@ end)
 FlyMode_Button.MouseButton1Click:Connect(function()
 	if FlyMode == "Classic" then
 		FlyMode = "Whimsical"
+	elseif FlyMode == "Whimsical" then
+		FlyMode = "Angelic"
 	else
 		FlyMode = "Classic"
 	end
 	FlyMode_Button.Text = "Mode: "..FlyMode
 	if Fly_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0) then
-		if FlyMode == "Whimsical" then
-			UpdateWhimsyAnim()
+		if FlyMode ~= "Classic" then
+			UpdateStyledFlyAnim()
 		else
 			StopWhimsyAnim()
 			PlayAnim(10714347256,4,0)
@@ -2974,6 +3019,9 @@ FlyMode_Button.MouseButton1Click:Connect(function()
 	end
 	if FlyMode == "Whimsical" and (not WhimsyIdleId or not WhimsyMoveId) then
 		SendNotify("System Broken","Whimsical animations couldn't be loaded, using the classic pose. Paste the AnimationIds into the override lines to fix.",6)
+	end
+	if FlyMode == "Angelic" and (not AngelicIdleId or not AngelicMoveId) then
+		SendNotify("System Broken","Angelic animations aren't set or couldn't be loaded, using the classic pose. Set the ANGELIC IDs to fix.",6)
 	end
 end)
 
@@ -3608,7 +3656,12 @@ end)
 
 AntiFling_Button.MouseButton1Click:Connect(function()
 	ChangeToggleColor(AntiFling_Button)
-	SetAntiFlingEnabled(AntiFling_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0))
+	if AntiFling_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0) then
+		_G.AntiFlingToggled = true
+		loadstring(game:HttpGet('https://raw.githubusercontent.com/H20CalibreYT/SystemBroken/main/AntiFling'))()
+	else
+		_G.AntiFlingToggled = false
+	end
 end)
 
 AntiChatSpy_Button.MouseButton1Click:Connect(function()
@@ -3755,71 +3808,6 @@ ChatBox_Input.FocusLost:Connect(function()
 	game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
 	ChatBox_Input.Text = ""
 end)
-
--- Local Anti Fling
-local ANTIFLING_MAX_SPIN = 50
-local ANTIFLING_MAX_SPEED = 200
-local AntiFlingConnection = nil
-local AntiFlingSafeCFrame = nil
-local AntiFlingOriginalCollisions = {}
-
-local function SetAntiFlingEnabled(enabled)
-	_G.AntiFlingToggled = enabled
-
-	if AntiFlingConnection then
-		AntiFlingConnection:Disconnect()
-		AntiFlingConnection = nil
-	end
-
-	if not enabled then
-		for part, canCollide in pairs(AntiFlingOriginalCollisions) do
-			if part and part.Parent then
-				part.CanCollide = canCollide
-			end
-		end
-		table.clear(AntiFlingOriginalCollisions)
-		AntiFlingSafeCFrame = nil
-		return
-	end
-
-	AntiFlingSafeCFrame = nil
-	AntiFlingConnection = RunService.Stepped:Connect(function()
-		for _, player in ipairs(Players:GetPlayers()) do
-			if player ~= plr and player.Character then
-				for _, part in ipairs(player.Character:GetDescendants()) do
-					if part:IsA("BasePart") then
-						if AntiFlingOriginalCollisions[part] == nil then
-							AntiFlingOriginalCollisions[part] = part.CanCollide
-						end
-						part.CanCollide = false
-					end
-				end
-			end
-		end
-
-		local character = plr.Character
-		local root = character and character:FindFirstChild("HumanoidRootPart")
-		if not root then
-			return
-		end
-
-		local angularSpeed = root.AssemblyAngularVelocity.Magnitude
-		local linearSpeed = root.AssemblyLinearVelocity.Magnitude
-		local isExcessiveSpin = angularSpeed > ANTIFLING_MAX_SPIN
-		local isExcessiveSpeed = linearSpeed > ANTIFLING_MAX_SPEED
-		local isExpectedFlySpeed = flying and linearSpeed <= (FlySpeed + 50)
-
-		if isExcessiveSpin or (isExcessiveSpeed and not isExpectedFlySpeed) then
-			if AntiFlingSafeCFrame then
-				root.CFrame = AntiFlingSafeCFrame
-			end
-			root.AssemblyLinearVelocity = Vector3.zero
-			root.AssemblyAngularVelocity = Vector3.zero
-		else
-			AntiFlingSafeCFrame = root.CFrame
-		end
-	end)
-end
 
 --GUI Functions
 Players.PlayerRemoving:Connect(function(player)
