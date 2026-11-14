@@ -2674,7 +2674,7 @@ local WhimsyMoveId = nil
 -- These are independent from Whimsical. They currently use the same catalog
 -- animations as Whimsical by default; set either override to a different
 -- AnimationId to give Angelic its own idle or moving animation.
-local ANGELIC_IDLE_ANIM_OVERRIDE = nil
+local ANGELIC_IDLE_ANIM_OVERRIDE = 87561786988944 --GOJO Float
 local ANGELIC_MOVE_ANIM_OVERRIDE = nil
 local AngelicIdleId = 87561786988944 --GOJO Float
 local AngelicMoveId = nil
