@@ -2668,7 +2668,7 @@ local WHIMSY_MOVE_ANIM_OVERRIDE = nil
 
 -- Angelic mode animations (catalog item IDs; set these to the idle and move you want)
 local ANGELIC_IDLE_CATALOG_ID = 97164262994588 -- IN LOVE
-local ANGELIC_MOVE_CATALOG_ID = 75581091919666 -- Mark Invincible Fly Emote
+local ANGELIC_MOVE_CATALOG_ID = 117931620432186 -- SuperHero
 -- Backup: if the automatic lookup fails, paste the real AnimationId numbers here
 local ANGELIC_IDLE_ANIM_OVERRIDE = nil
 local ANGELIC_MOVE_ANIM_OVERRIDE = nil
