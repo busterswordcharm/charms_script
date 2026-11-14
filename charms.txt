@@ -8,7 +8,6 @@ if game.CoreGui:FindFirstChild("SysBroker") then
 end
 local version = 2
 --VARIABLES
-_G.AntiFlingToggled = false
 local Players = game:GetService("Players")
 local plr = Players.LocalPlayer
 local TweenService = game:GetService("TweenService")
@@ -2668,7 +2667,7 @@ local WHIMSY_IDLE_ANIM_OVERRIDE = nil
 local WHIMSY_MOVE_ANIM_OVERRIDE = nil
 
 -- Angelic mode animations (catalog item IDs; set these to the idle and move you want)
-local ANGELIC_IDLE_CATALOG_ID = 87561786988944 --GOJO Float
+local ANGELIC_IDLE_CATALOG_ID = 97164262994588 -- IN LOVE
 local ANGELIC_MOVE_CATALOG_ID = 75581091919666 -- Mark Invincible Fly Emote
 -- Backup: if the automatic lookup fails, paste the real AnimationId numbers here
 local ANGELIC_IDLE_ANIM_OVERRIDE = nil
@@ -3654,16 +3653,6 @@ end)
 
 --MISC
 
-AntiFling_Button.MouseButton1Click:Connect(function()
-	ChangeToggleColor(AntiFling_Button)
-	if AntiFling_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0) then
-		_G.AntiFlingToggled = true
-		loadstring(game:HttpGet('https://raw.githubusercontent.com/H20CalibreYT/SystemBroken/main/AntiFling'))()
-	else
-		_G.AntiFlingToggled = false
-	end
-end)
-
 AntiChatSpy_Button.MouseButton1Click:Connect(function()
 	ChangeToggleColor(AntiChatSpy_Button)
 	if AntiChatSpy_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0) then
@@ -3807,6 +3796,59 @@ ChatBox_Input.FocusLost:Connect(function()
 	local args = {[1] = ChatBox_Input.Text,[2] = "All"}
 	game:GetService("ReplicatedStorage").DefaultChatSystemChatEvents.SayMessageRequest:FireServer(unpack(args))
 	ChatBox_Input.Text = ""
+end)
+
+--ANTI FLING (protects only you; runs locally, no downloads)
+local ANTIFLING_MAX_SPIN = 50     -- rad/s; faster spins on you get cancelled
+local ANTIFLING_MAX_SPEED = 200   -- studs/s sideways or upward when not flying
+local AntiFlingConn = nil
+local AntiFlingLastSafe = nil
+
+AntiFling_Button.MouseButton1Click:Connect(function()
+	ChangeToggleColor(AntiFling_Button)
+	if AntiFling_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0) then
+		AntiFlingLastSafe = nil
+		AntiFlingConn = RunService.Stepped:Connect(function()
+			-- 1) other players' bodies can't bump into you (only changes your own view)
+			for _,other in ipairs(Players:GetPlayers()) do
+				if other ~= plr and other.Character then
+					for _,part in ipairs(other.Character:GetDescendants()) do
+						if part:IsA("BasePart") and part.CanCollide then
+							part.CanCollide = false
+						end
+					end
+				end
+			end
+			-- 2) undo sudden spins or launches on your own character
+			pcall(function()
+				local root = GetRoot(plr)
+				local hum = plr.Character.Humanoid
+				local v = root.AssemblyLinearVelocity
+				local sideways = Vector3.new(v.X, 0, v.Z).Magnitude
+				local upward = math.max(v.Y, 0)
+				local flyingNow = Fly_Button.Ticket_Asset.ImageColor3 == Color3.fromRGB(0,255,0)
+				local limit = math.max(ANTIFLING_MAX_SPEED, hum.WalkSpeed*1.5)
+				if flyingNow then
+					limit = math.max(limit, FlySpeed*1.5 + 50)
+				end
+				if root.AssemblyAngularVelocity.Magnitude > ANTIFLING_MAX_SPIN and not flyingNow
+					or sideways > limit or upward > limit then
+					root.AssemblyAngularVelocity = Vector3.new()
+					root.AssemblyLinearVelocity = Vector3.new()
+					if AntiFlingLastSafe then
+						root.CFrame = AntiFlingLastSafe
+					end
+				else
+					AntiFlingLastSafe = root.CFrame
+				end
+			end)
+		end)
+	else
+		if AntiFlingConn then
+			AntiFlingConn:Disconnect()
+			AntiFlingConn = nil
+		end
+	end
 end)
 
 --GUI Functions
